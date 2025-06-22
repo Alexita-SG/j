@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panda Motivador</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #fce4b8;
+      overflow: hidden;
+      font-family: 'Comic Sans MS', cursive;
+    }
+
+    .mensaje {
+      position: absolute;
+      top: 10%;
+      width: 100%;
+      text-align: flex;
+      font-size: 1.5rem;
+      color: #6a4e3b;
+      animation: fadeIn 3s ease-in-out infinite alternate;
+      z-index: 2;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .video-contenedor {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 570px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      z-index: 3;
+    }
+
+    .video-contenedor video {
+      width: 110%;
+      height: 110%;
+      object-fit: cover;
+    }
+
+    .flor {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-image: url('img/flor.png');
+      background-size: cover;
+      animation: caer 6s linear infinite;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    @keyframes caer {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+    
+
+  <div class="mensaje">¡YA VEZ QUE SÍ ABRISTE EL ENLACE! 😈🤣  <br> Haz clic para comenzar la magia ✨🎶</div>
+
+  <div class="video-contenedor">
+    <video autoplay muted loop>
+      <source src="alevideo.mp4" type="video/mp4">
+      Tu navegador no puede reproducir el video.
+    </video>
+  </div>
+<audio id="musica" loop>
+  <source src="ale.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  // Escucha el primer clic en cualquier lugar de la página
+  document.addEventListener('click', () => {
+    const musica = document.getElementById('musica');
+    musica.play();
+  }, { once: true }); // Solo la primera vez
+</script>
+
+
+  <!-- Canvas para los fuegos artificiales -->
+  <canvas id="fireworks"></canvas>
+
+  <script>
+    // Flores cayendo
+    function crearFlor() {
+      const flor = document.createElement('div');
+      flor.classList.add('flor');
+      flor.style.left = Math.random() * 100 + 'vw';
+      flor.style.animationDuration = (Math.random() * 3 + 4) + 's';
+      document.body.appendChild(flor);
+      setTimeout(() => flor.remove(), 6000);
+    }
+    setInterval(crearFlor, 400);
+  </script>
+
+  <script>
+    // Juegos pirotécnicos con canvas
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const fireworks = [];
+
+    function Firework(x, y) {
+      this.x = x;
+      this.y = y;
+      this.particles = [];
+      for (let i = 0; i < 60; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 4 + 1;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        this.particles.push({ x: this.x, y: this.y, vx, vy, alpha: 1, color });
+      }
+      
+    }
+
+    Firework.prototype.update = function () {
+      this.particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05; // gravedad
+        p.alpha -= 0.015;
+      });
+      this.particles = this.particles.filter(p => p.alpha > 0);
+    };
+
+    Firework.prototype.draw = function () {
+      this.particles.forEach(p => {
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    };
+
+    function animate() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      fireworks.forEach(f => {
+        f.update();
+        f.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    function lanzarFuego() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height * 0.6;
+      fireworks.push(new Firework(x, y));
+    }
+
+    setInterval(lanzarFuego, 1000);
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+
+</body>
+</html>
